@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+#       Extract genotypes for GRM
+#
+#SBATCH --job=<JOB_NAME>
+#SBATCH --account=<ACCOUNT_NAME>
+#SBATCH --mem-per-cpu=2048
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --time=2:00:00
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+# Input files should be GS markers from all autosomes minus the one being tested
+#
+# input arguments:
+#   $1 = input directory
+#   $2 = input filename prefix
+#   $3 = output directory
+#
+# Example usage:
+#   sbatch 1a_extract_grm_positions.sbatch <INPUT_DIR> <INPUT_PREFIX> <OUTPUT_DIR>
+
+IN_DIR="$1"
+IN_FILE="$2"
+OUT_DIR="$3"
+BINARY_FILE="${IN_DIR}/${IN_FILE}"
+
+# Load software
+module load PLINK/1.09b6.16
+
+# Path to SNP list used for GRM extraction
+SNPLIST="<PATH_TO_SNPLIST>"   # e.g., 50k.allchr.snplist
+
+# Extract genotypes
+plink \
+  --cow \
+  --const-fid 0 \
+  --extract "${SNPLIST}" \
+  --bfile "${BINARY_FILE}" \
+  --make-bed \
+  --out "${OUT_DIR}/grm_geno_set"
